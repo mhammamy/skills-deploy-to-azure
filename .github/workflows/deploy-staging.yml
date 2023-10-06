@@ -1,17 +1,18 @@
-name: Deploy to production
+name: Deploy to staging 
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types: [labeled]
 
 env:
   IMAGE_REGISTRY_URL: ghcr.io
   DOCKER_IMAGE_NAME: mhammamy-azure-ttt
   AZURE_WEBAPP_NAME: mhammamy-ttt-app
-  
+
 jobs:
   build:
+    if: contains(github.event.pull_request.labels.*.name, 'stage')
+
     runs-on: ubuntu-latest
 
     steps:
@@ -85,7 +86,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{env.AZURE_WEBAPP_NAME}}
-          images: ${{env.IMAGE_REGISTRY_URL}}/${{ github.repository }}/${{env.DOCKER_IMAGE_NAME}}:${{github.sha}}
+          images: ${{env.IMAGE_REGISTRY_URL}}/${{ github.repository }}/${{env.DOCKER_IMAGE_NAME}}:${{ github.sha }}
 
       - name: Azure logout via Azure CLI
         uses: azure/CLI@v1
